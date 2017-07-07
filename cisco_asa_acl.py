@@ -1,5 +1,23 @@
 #!/usr/bin/python
 
+DOCUMENTATION = '''
+---
+module: cisco_asa_acl
+short_description: Creates Access Lists on Cisco ASA
+'''
+
+EXAMPLES = '''
+- name: Create access list
+  cisco_asa_acl:
+    ip: "10.10.10.10"
+    username: admin
+    password: Password_1
+    secret: Password_2
+    lists:
+      - access-list extended extended permit tcp any any eq 8888
+      - access-list test_ASA extended permit tcp any any eq 8888
+'''
+
 from ansible.module_utils.basic import *
 from netmiko import ConnectHandler
 
