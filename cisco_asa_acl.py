@@ -110,6 +110,7 @@ def main():
 
     module = AnsibleModule(argument_spec=fields)
 
+    parse_acl_name(module)
     execute_acl(module)
 
 if __name__ == '__main__':
