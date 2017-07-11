@@ -42,35 +42,61 @@ def parse_acl_name(module):
                 module.fail_json(msg='All lines/commands must use the same access-list %s is not %s' % (ace[1], acl_name))
         first_line = False
 
-def execute_acl(data):
-    params = data.copy()
-    del params['lists']
+def execute_acl(module):
+    data = module.params.copy()
+
+    del data['lists']
+
+    connect = ConnectHandler(**data)
+    acl_config = connect.send_command('show running-config access-list')
+    connect.config_mode()
 
     has_changed = 0
     has_not_changed = 0
 
-    connect = ConnectHandler(**params)
-    acl_config = connect.send_command('show running-config access-list')
-    connect.config_mode()
+    for acl in module.params['lists']:
+        cmd = connect.send_command(acl)
+        regex = re.search('(error|warning)', cmd, re.IGNORECASE)
 
-    for acl in data['lists']:
-        if acl not in acl_config:
-            command = connect.send_command(acl)
-            regex = re.search('(error|warning)', command, re.IGNORECASE)
-            if regex:
-                return True, True, {"status": command}
-            has_changed += 1
-        else:
-            has_not_changed += 1
+        ace = acl.split()
+
+        if  ace[0] == 'no':
+            del ace[0]
+            no_acl = ' ' . join(ace)
+
+            if no_acl in acl_config:
+                command = connect.send_command(acl)
+                regex = re.search('(error|warning)', command, re.IGNORECASE)
+                if regex:
+                    result = {"Status": "Something went wrong with this ACL:" +
+                            + " " + str(acl)}
+                    module.fail_json(msg=result)
+                has_changed += 1
+            else:
+                has_not_changed += 1
+
+        elif ace[0] == 'access-list':
+            if acl not in acl_config:
+                if regex:
+                    result = {"Status": "Something went wrong with this ACL:" +
+                            + " " + str(acl)}
+                    module.fail_json(msg=result)
+                has_changed += 1
+            else:
+                has_not_changed += 1
 
     if has_changed > 0:
-        return False, True, {"status": "Has changed some ASL(s)"}
-    elif (has_not_changed > 0 and has_not_changed == len(data['lists'])
+        result = {"status": "Has changed some ASL(s)"}
+        module.exit_json(changed=has_changed, meta=result)
+    elif (has_not_changed > 0 and has_not_changed == len(module.params['lists'])
             and has_changed == 0):
-        return False, False, {"status": "ACL(s) already exist"}
+        result = {"status": "Nothing to change"}
+        module.exit_json(changed=False, meta=result)
     else:
-        return True, True, {"status": "Something went really wrong" +
-               " " + "you should have never see this message"}
+        result = {"status": "Something went really wrong" +
+                       " " + "you should have never see this message",
+                       "cmd": acl}
+        module.fail_json(msg=result)
 
 def main():
     fields = {
@@ -83,11 +109,8 @@ def main():
     }
 
     module = AnsibleModule(argument_spec=fields)
-    is_error, has_changed, result =  execute_acl(module.params)
 
-    if not is_error:
-        module.exit_json(changed=has_changed, meta=result)
-    else:
-        module.fail_json(msg=result)
+    execute_acl(module)
+
 if __name__ == '__main__':
     main()
