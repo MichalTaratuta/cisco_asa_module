@@ -65,8 +65,6 @@ def execute_acl(module):
             no_acl = ' ' . join(ace)
 
             if no_acl in acl_config:
-                command = connect.send_command(acl)
-                regex = re.search('(error|warning)', command, re.IGNORECASE)
                 if regex:
                     result = {"Status": "Something went wrong with this ACL:" +
                             + " " + str(acl)}
