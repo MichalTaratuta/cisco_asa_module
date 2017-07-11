@@ -14,8 +14,8 @@ EXAMPLES = '''
     password: Password_1
     secret: Password_2
     lists:
-      - access-list extended extended permit tcp any any eq 8888
-      - access-list test_ASA extended permit tcp any any eq 8888
+      - no access-list Left-to-Right extended permit ip host 172.16.1.110 host 192.168.1.110
+      - access-list Left-to-Right extended permit tcp any any eq 8888
 '''
 
 from ansible.module_utils.basic import *
