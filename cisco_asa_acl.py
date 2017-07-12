@@ -84,7 +84,9 @@ def execute_acl(module):
                 has_not_changed += 1
 
     if has_changed > 0:
-        result = {"status": "Has changed some ASL(s)"}
+        connect.send_command('write memory')
+        result = {"status": "Changed some access-lists(s)," +
+                        " " + "running-config saved"}
         module.exit_json(changed=has_changed, meta=result)
     elif (has_not_changed > 0 and has_not_changed == len(module.params['lists'])
             and has_changed == 0):
@@ -92,7 +94,7 @@ def execute_acl(module):
         module.exit_json(changed=False, meta=result)
     else:
         result = {"status": "Something went really wrong" +
-                       " " + "you should have never see this message",
+                       " " + "running-config has not been saved",
                        "cmd": acl}
         module.fail_json(msg=result)
 
