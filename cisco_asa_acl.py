@@ -71,7 +71,7 @@ def execute_acl(module):
             if no_acl in acl_config:
                 if regex:
                     result = {"Status": "Something went wrong with this ACL:" +
-                            + " " + str(acl)}
+                            " " + str(acl)}
                     module.fail_json(msg=result)
                 has_changed += 1
             else:
@@ -81,7 +81,7 @@ def execute_acl(module):
             if acl not in acl_config:
                 if regex:
                     result = {"Status": "Something went wrong with this ACL:" +
-                            + " " + str(acl)}
+                            " " + str(acl)}
                     module.fail_json(msg=result)
                 has_changed += 1
             else:
