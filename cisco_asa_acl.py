@@ -28,10 +28,13 @@ def parse_acl_name(module):
         no_acl = ace[0] + ' ' + ace[1]
 
         if ace[0] != 'access-list' and no_acl != 'no access-list':
-            module.fail_json(msg='All lines/commands must begin with "access-list" or "no access list"%s is not permitted' % ace[0])
+            module.fail_json(msg='All lines/commands must begin with' +
+                    ' ' + '"access-list" or "no access-list"' +
+                    ' ' + '%s is not permitted' % ace[0])
 
         if len(ace) <= 1:
-            module.fail_json(msg='All lines/commands must contain the name of the access-list')
+            module.fail_json(msg='All lines/commands must contain the name of' +
+                    ' ' + 'the access-list')
 
         if first_line and ace[0] == 'no':
             acl_name = ace[2]
@@ -39,7 +42,8 @@ def parse_acl_name(module):
             acl_name = ace[1]
         else:
             if acl_name != ace[1]:
-                module.fail_json(msg='All lines/commands must use the same access-list %s is not %s' % (ace[1], acl_name))
+                module.fail_json(msg='All lines/commands must use the same' +
+                        ' ' + 'access-list %s is not %s' % (ace[1], acl_name))
         first_line = False
 
 def execute_acl(module):
